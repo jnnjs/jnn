@@ -1,0 +1,50 @@
+{
+    "name": "Jaunty",
+    "version": "0.0.1",
+    "description": "a different javascript framework",
+    "keywords": "Jaunty",
+    "repository": {
+        "type": "git",
+        "url": "git@gitlab.com:jaunty/jauntyjs.git"
+    },
+    "devDependencies": {
+        "babel-eslint": "^9.0.0",
+        "buble": "^0.19.3",
+        "eslint": "^5.5.0",
+        "eslint-plugin-flowtype": "^2.50.0",
+        "flow-bin": "^0.80.0",
+        "jasmine-core": "^3.2.1",
+        "karma": "^3.0.0",
+        "karma-chrome-launcher": "^2.2.0",
+        "karma-jasmine": "^1.1.2",
+        "karma-rollup-preprocessor": "^6.0.1",
+        "nodemon": "^1.18.4",
+        "optimist": "^0.6.1",
+        "pre-commit": "^1.2.2",
+        "puppeteer": "^1.8.0",
+        "rollup": "^0.65.2",
+        "rollup-plugin-buble": "^0.19.2",
+        "rollup-plugin-node-resolve": "^3.4.0"
+    },
+    "scripts": {
+        "build": "gulp build",
+        "watch": "gulp watch",
+        "test-server": "nodemon test/server/index.js",
+        "test-extension": "karma start --file=test/unit/extension.spec.js",
+        "test-script": "karma start --file=test/unit/script.spec.js",
+        "test-style": "karma start --file=test/unit/style.spec.js",
+        "test-style-parser": "karma start --file=test/unit/style/parser.spec.js",
+        "test-style-variables": "karma start --file=test/unit/style/variables.spec.js",
+        "test-utils": "karma start --file=test/unit/utils.spec.js",
+        "test-message": "karma start --file=test/unit/message.spec.js",
+        "test-j": "karma start --filelist=test/unit/j.spec.js,test/unit/resources/j-script.js",
+        "lint": "eslint ./ --cache --ignore-path .eslintignore",
+        "precommit-msg": "echo 'Pre-commit checks...' && exit 0"
+    },
+    "pre-commit": [
+        "precommit-msg",
+        "lint"
+    ],
+    "author": "LvChengbin<lvchengbin59@gmail.com>",
+    "dependencies": {}
+}
