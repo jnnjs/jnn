@@ -1,57 +1,55 @@
-// @flow
 const is = {
     // check function
-    function( fn: mixed ): boolean {
-        const str = ({}).toString.call( fn );
-        return str === '[object Function]' || str === '[object AsyncFunction]';
+    function( f ) {
+        return typeof f === 'function'
     },
 
     // check string
-    string( s: mixed ): boolean {
+    string( s ) {
         return typeof s === 'string' || s instanceof String;
     },
 
     // check object
-    object( o: mixed): boolean {
-        return o && typeof o === 'object' && !Array.isArray( o );
+    object( o ) {
+        return !!o && typeof o === 'object' && !Array.isArray( o );
     },
 
-    date( d: mixed ): boolean {
+    date( d ) {
         return ({}).toString.call( d ) === '[object Date]';
-    }
+    },
 
     // check promise
-    promise( p: mixed ): boolean {
-        return p && is.f( p.then ) && is.f( p.catch );
+    promise( p ) {
+        return !!p && is.function( p.then ) && is.function( p.catch );
     },
 
     // check undefined
-    undefined( u: mixed ): boolean {
+    undefined( u ) {
         return arguments.length > 0 && typeof u === 'undefined';
     },
 
     // check HTML Node
-    node( n: mixed ): boolean {
-        return typeof Node === 'object' ? n instanceof Node : n && typeof n === 'object' && typeof n.nodeType === 'number' && typeof n.nodeName === 'string';
+    node( n ) {
+        return typeof Node === 'object' ? n instanceof Node :  !!n && typeof n === 'object' && typeof n.nodeType === 'number' && typeof n.nodeName === 'string';
     },
 
     // check HTML Element Node
-    enode( n: mixed ): boolean {
-        return n && n.nodeType === 1 && is.node( n );
+    enode( n ) {
+        return !!n && n.nodeType === 1 && is.node( n );
     },
 
     // check HTML Text Node
-    tnode( n: mixed ): boolean {
-        return n && n.nodeType === 3 && is.node( n );
+    tnode( n ) {
+        return !!n && n.nodeType === 3 && is.node( n );
     },
 
-    number( n: mixed, strict?: boolean = false ): boolean {
+    number( n, strict = false ) {
         if( ({}).toString.call( n ) === '[object Number]' ) return true;
-        if( strict ) return false;
+        if( strict || !is.string( n ) ) return false;
         return !isNaN( parseFloat( n ) ) && isFinite( n ) && !/\.$/.test( n );
     },
 
-    int( i: mixed, strict?: boolean = false ): boolean {
+    int( i, strict = false ) {
         if( is.number( i, true ) ) return i % 1 === 0;
         if( strict ) return false;
         if( is.string( i ) ) {
@@ -62,7 +60,7 @@ const is = {
     },
 
     // check IPv4 address
-    ipv4( ip: mixed ): boolean {
+    ipv4( ip ) {
         if( !is.string( ip ) ) return false;
         const pieces = ip.split( '.' );
         if( pieces.length !== 4 ) return false;
@@ -72,7 +70,7 @@ const is = {
         return true;
     },
 
-    ipv6( ip: mixed ): boolean {
+    ipv6( ip ) {
 
         /**
          * BNF of IPv6:
@@ -146,7 +144,5 @@ const is = {
         }
         return true;
     }
-
 };
-
 export default is;

@@ -1,23 +1,30 @@
 {
-    "name": "Jaunty",
-    "version": "0.0.1",
-    "description": "a different javascript framework",
-    "keywords": "Jaunty",
+    "name": "jnn",
+    "version": "0.0.0",
+    "description": "Another javascript framework",
+    "keywords": [
+        "jnn",
+        "framework",
+        "mv*",
+        "mvc",
+        "mvvm"
+    ],
     "repository": {
         "type": "git",
-        "url": "git@gitlab.com:jaunty/jauntyjs.git"
+        "url": "https://github.com/jnnjs/jnn.git"
     },
     "devDependencies": {
-        "babel-eslint": "^9.0.0",
+        "@lvchengbin/koa-basic-auth": "0.0.3",
+        "@lvchengbin/sleep": "0.0.2",
         "buble": "^0.19.3",
         "eslint": "^5.5.0",
-        "eslint-plugin-flowtype": "^2.50.0",
-        "flow-bin": "^0.80.0",
         "jasmine-core": "^3.2.1",
         "karma": "^3.0.0",
         "karma-chrome-launcher": "^2.2.0",
         "karma-jasmine": "^1.1.2",
+        "karma-jasmine-ajax": "^0.1.13",
         "karma-rollup-preprocessor": "^6.0.1",
+        "karma-server": "0.0.5",
         "nodemon": "^1.18.4",
         "optimist": "^0.6.1",
         "pre-commit": "^1.2.2",
@@ -29,7 +36,18 @@
     "scripts": {
         "build": "gulp build",
         "watch": "gulp watch",
-        "test-server": "nodemon test/server/index.js",
+        "test": "karma start",
+        "test-url": "karma start --file=test/lib/url/url.spec.js,test/lib/url/parse.spec.js,test/lib/url/resolve.spec.js",
+        "test-url-url": "karma start --file=test/lib/url/url.spec.js",
+        "test-url-parse": "karma start --file=test/lib/url/parse.spec.js",
+        "test-url-resolve": "karma start --file=test/lib/url/resolve.spec.js",
+        "test-http": "karma start --file=test/lib/http/jsonp.spec.js,test/lib/http/ajax.spec.js",
+        "test-http-jsonp": "karma start --file=test/lib/http/jsonp.spec.js",
+        "test-http-ajax": "karma start --file=test/lib/http/ajax.spec.js",
+        "test-sequence": "karma start --file=test/lib/sequence.spec.js",
+        "test-localcache": "karma start --file=test/lib/localcache/index.spec.js,test/lib/localcache/md5.spec.js,test/lib/localcache/storage.spec.js",
+        "test-localcache-md5": "karma start --file=test/lib/localcache/md5.spec.js",
+        "test-localcache-storage": "karma start --file=test/lib/localcache/storage.spec.js",
         "test-extension": "karma start --file=test/unit/extension.spec.js",
         "test-script": "karma start --file=test/unit/script.spec.js",
         "test-style": "karma start --file=test/unit/style.spec.js",
@@ -45,6 +63,9 @@
         "precommit-msg",
         "lint"
     ],
-    "author": "LvChengbin<lvchengbin59@gmail.com>",
+    "author": {
+        "name": "LvChengbin",
+        "email": "lvchengbin59@gmail.com"
+    },
     "dependencies": {}
 }

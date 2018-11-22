@@ -1,8 +1,7 @@
 import Base from './core/base';
 import is from './util/is';
-import { URL } from './url';
-
 import Script from './script';
+
 import { __packages, __extensions } from './variables';
 
 import { uniqueId, extract, currentScriptURL } from './utils';

@@ -2,43 +2,45 @@
 // Generated on Tue Jul 11 2017 12:49:06 GMT+0800 (CST)
 
 process.env.CHROME_BIN = require( 'puppeteer' ).executablePath();
-
-const resolve = require( 'rollup-plugin-node-resolve' );
-
-//const babel = require( 'rollup-plugin-babel' );
-
 const argv = require( 'optimist' ).argv;
+const resolve = require( 'rollup-plugin-node-resolve' );
+const buble = require( 'rollup-plugin-buble' );
 
-module.exports = function(config) {
+const rollupPlugins = [
+    resolve( { module : true, jsnext : true } )
+];
+
+if( argv.es5 ) {
+    rollupPlugins.push(
+        buble( {
+            transforms : {
+                arrow : true,
+                dangerousForOf : true
+            }
+        } )
+    );
+}
+
+module.exports = function( config ) {
     config.set({
 
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
 
-
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         // Most versions of PhantomJS do not suppport ES5 and ES6, so add es6-shim here to make sure all
         // test cases could be executed in PhantomJS
-        frameworks: [ 'jasmine', 'es6-shim' ],
-
+        frameworks: [ 'jasmine-ajax', 'jasmine', 'server' ],
 
         // list of files / patterns to load in the browser
         files : ( () => {
             const files = [
-                'test/lib/main.js',
-                { pattern : 'dist/**/*.js', included : false, watched : false },
                 { pattern : 'src/**/*.js', included : false, watched : false }
             ];
 
-            if( argv.file || argv.filelist ) {
-                argv.file && files.push( {
-                    pattern : argv.file.trim(),
-                    included : true,
-                    watched : false
-                } );
-
-                argv.filelist && argv.filelist.split( ',' ).forEach( file => {
+            if( argv.file ) {
+                argv.file.split( ',' ).forEach( file => {
                     files.push( {
                         pattern : file.trim(),
                         included : true,
@@ -56,29 +58,28 @@ module.exports = function(config) {
             return files;
         } )(),
 
-        // list of files to exclude
-        exclude: [
-            'test/server/**/*.js'
-        ],
-
-
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
             'test/**/*.js' : [ 'rollup' ],
         },
 
-        // 
         rollupPreprocessor : {
-            plugins : [
-                resolve( {
-                    module : true,
-                    jsnext : true
-                } )
-            ],
+            plugins : rollupPlugins,
             output : {
                 format : 'iife'
             }
+        },
+
+        // configuration for server
+        server : {
+            //debugging : true,
+            namespace : 'ynn',
+            port : 3000,
+            modules : {
+                http : './test/lib/http/server'
+            },
+            'Access-Control-Allow-Headers' : 'x-custom-header, Authorization'
         },
 
         // test results reporter to use
