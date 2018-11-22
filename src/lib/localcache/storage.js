@@ -15,7 +15,7 @@ export default class Storage {
             throw new TypeError( `Expect a name for the storage, but a(n) ${name} is given.` );
         }
 
-        this.name = `#JNN-STORAGE-V-1.0#${name}#`;
+        this.name = `#\x01#JNN-STORAGE-V-1.0#${name}#`;
 
         /**
          * abstract methods
@@ -24,7 +24,6 @@ export default class Storage {
         const abstracts = [ 'set', 'get', 'delete', 'clear', 'keys' ];
 
         for( let method of abstracts ) {
-
             if( !is.function( this[ method ] ) ) {
                 throw new TypeError( `The method "${method}" must be declared in every class extends from Cache` );
             }

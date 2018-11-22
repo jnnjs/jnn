@@ -28,7 +28,7 @@
         "nodemon": "^1.18.4",
         "optimist": "^0.6.1",
         "pre-commit": "^1.2.2",
-        "puppeteer": "^1.8.0",
+        "puppeteer": "^1.10.0",
         "rollup": "^0.65.2",
         "rollup-plugin-buble": "^0.19.2",
         "rollup-plugin-node-resolve": "^3.4.0"

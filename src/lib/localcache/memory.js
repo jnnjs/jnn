@@ -1,5 +1,7 @@
 import Storage from './storage';
 
+const DATA = Symbol( 'memory#data' );
+
 /**
  * To create a Memory storage engine for LocalCache.
  * @class
@@ -11,7 +13,7 @@ export default class Memory extends Storage {
      */
     constructor( name ) {
         super( name );
-        this.data = {};
+        this[ DATA ] = {};
     }
 
     /**
@@ -23,12 +25,12 @@ export default class Memory extends Storage {
      */
     set( key, data, options = {} ) {
         data = this.wrap( data, options );
-        this.data[ key ] = data;
+        this[ DATA ][ key ] = data;
         return Promise.resolve( data );
     }
 
     get( key, options = {} ) {
-        const data = this.data[ key ];
+        const data = this[ DATA ][ key ];
 
         if( !data ) return Promise.reject();
 
@@ -41,17 +43,17 @@ export default class Memory extends Storage {
     }
 
     delete( key ) {
-        this.data[ key ] = null;
-        delete this.data[ key ];
+        this[ DATA ][ key ] = null;
+        delete this[ DATA ][ key ];
         return Promise.resolve();
     }
 
     keys() {
-        return Promise.resolve( Object.keys( this.data ) );
+        return Promise.resolve( Object.keys( this[ DATA ] ) );
     }
 
     clear() {
-        this.data = {};
+        this[ DATA ] = {};
         return Promise.resolve();
     }
 }
