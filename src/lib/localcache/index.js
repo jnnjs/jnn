@@ -29,7 +29,10 @@ class LocalCache {
      *
      * @param {string} key - The key of the data.
      * @param {mixed} data - Data content.
-     * @param {Object} options
+     * @param {Object} [options={}]
+     * @param {Object} [options.page]
+     * @param {Object} [options.persistent]
+     * @param {Object} [options.session]
      */
     set( key, data, options = {} ) {
 
@@ -62,14 +65,23 @@ class LocalCache {
         }
 
         if( !steps.length ) {
-            throw new TypeError( `You must specify at least one storage mode in [${LocalCache.STORAGES.join(', ')}]` );
+            return Promise.reject( new TypeError( `You must specify at least one storage mode in [${LocalCache.STORAGES.join(', ')}]` ) );
         }
 
         return Sequence.all( steps ).then( () => data );
     }
 
+    /**
+     * getting data from certain modes
+     *
+     * @param {string} key
+     * @param {Array|string} modes
+     */
     get( key, modes, options = {} ) {
 
+        /**
+         * to seek in all storage engines by default.
+         */
         if( is.object( modes ) ) {
             modes = LocalCache.STORAGES;
             options = modes;
@@ -77,59 +89,55 @@ class LocalCache {
 
         modes || ( modes = LocalCache.STORAGES );
 
+        Array.isArray( modes ) || ( modes = [ modes ] );
+
         const steps = [];
 
         for( let mode of modes ) {
             if( !this[ mode ] ) {
-                throw new TypeError( `Unexcepted storage mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` );
+                return Promise.reject( new TypeError( `Unexcepted storage mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` ) );
             }
             steps.push( () => this[ mode ].get( key, options ) );
         }
 
-        return Sequence.any( steps ).then( results => {
-            const result = results[ results.length - 1 ];
-            const value = result.value;
-
-            let store = false;
-
-            for( const item of LocalCache.STORAGES ) {
-                if( options[ item ] && item !== value.storage ) {
-                    store = true;
-                }
-            }
-
-            if( !store ) return value;
-
-            const opts = Object.assign( value, options, {
-                [ value.storage ] : false
-            } );
-
-            return this.set( key, value.data, opts ).then( () => value );
-        } );
+        return Sequence.any( steps ).then( r => r[ r.length - 1 ].value );
     }
 
+    /**
+     * deleting data from certain storage engines
+     *
+     * @param {string} key
+     * @param {string|array} modes
+     */
     delete( key, modes ) {
         modes || ( modes = LocalCache.STORAGES );
+        Array.isArray( modes ) || ( modes = [ modes ] );
 
         const steps = [];
 
         for( let mode of modes ) {
             if( !this[ mode ] ) {
-                throw new TypeError( `Unexcepted mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` );
+                return Promise.reject( new TypeError( `Unexcepted mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` ) );
             }
             steps.push( () => this[ mode ].delete( key ) );
         }
         return Sequence.all( steps );
     }
 
+    /**
+     * removing all data in certain engines
+     *
+     * @param {string|Array} modes
+     */
     clear( modes ) {
         modes || ( modes = LocalCache.STORAGES );
+        Array.isArray( modes ) || ( modes = [ modes ] );
 
         const steps = [];
 
         for( let mode of modes ) {
             if( !this[ mode ] ) {
-                throw new TypeError( `Unexcepted mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` );
+                return Promise.reject( new TypeError( `Unexcepted mode "${mode}", excepted one of: ${LocalCache.STORAGES.join( ', ' )}` ) );
             }
             steps.push( () => this[ mode ].clear() );
         }
@@ -137,66 +145,77 @@ class LocalCache {
         return Sequence.all( steps );
     }
 
+    /**
+     * to clean all data that stored by removing useless.
+     *
+     * @param {Object} [options={}]
+     * @param {number} [options.rank]
+     * @param {number|Array} [options.length] - a number or a section for denoting removing datas which have content length match the specified length.
+     * @param {number} [options.ctime]
+     * @param {string} [options.type]
+     * @param {Function} [options.filter]
+     */
     clean( options = {} ) {
-        const check = ( data, key ) => {
+        /**
+         * the function for filtering the data with specified options.
+         */
+        const filter = ( data, key ) => {
             let remove = false;
 
-            const { rank, length, ctime, type } = options;
+            let { rank, length, ctime, type } = options;
 
-            if( !is.undefined( rank ) ) {
-                if( data.rank < rank ) {
+            /**
+             * removing all data whose rank little than the specified rank.
+             */
+            if( !is.undefined( rank ) && data.rank < rank ) {
+                remove = true;
+            }
+
+            /**
+             * to filter data by the content length
+             */
+            if( !remove && !is.undefined( length ) ) {
+                const content = data.data;
+                if( Array.isArray( length ) ) {
+                    // if the specified length is a section, such as [ 0, 100 ]
+                    if( content.length >= length[ 0 ] && content.length <= length[ 1 ] ) {
+                        remove = true;
+                    }
+                } else if( content.length >= length ) {
                     remove = true;
                 }
             }
 
-            if( !remove && !is.undefined( length ) ) {
-                const content = data.data;
-                if( is.number( length ) ) {
-                    if( content.length >= length ) {
-                        remove = true;
-                    }
-                } else if( Array.isArray( length ) ) {
-                    if( content.length >= length[ 0 ] && content.length <= length[ 1 ] ) {
-                        remove = true;
-                    }
-                }
-            }
-
+            /**
+             * to filter data by creation time
+             */
             if( !remove && !is.undefined( ctime ) ) {
-                if( is.date( ctime ) || is.number( ctime ) ) {
-                    if( data.ctime < +ctime ) {
-                        remove = true;
-                    }
-                } else if( Array.isArray( ctime ) ) {
+                if( Array.isArray( ctime ) ) {
                     if( data.ctime > ctime[ 0 ] && data.ctime < ctime[ 1 ] ) {
                         remove = true;
                     }
+                } else if( data.ctime < +ctime ) {
+                    remove = true;
                 }
             }
 
             if( !remove ) {
-                if( Array.isArray( type ) ) {
-                    if( type.indexOf( data.type ) > -1 ) {
-                        remove = true;
-                    }
-                } else if( type == data.type ) {
+                Array.isArray( type ) || ( type = [ type ] );
+                if( type.indexOf( data.type ) > -1 ) {
                     remove = true;
                 }
             }
 
-            if( !remove && is.function( options.remove ) ) {
-                if( options.remove( data, key ) === true ) {
-                    remove = true;
-                }
+            if( !remove && is.function( options.filter ) && options.filter( data, key ) === false ) {
+                remove = true;
             }
-
             return remove;
         };
 
         const steps = [];
 
         for( let mode of LocalCache.STORAGES ) {
-            steps.push( this[ mode ].clean( check ) );
+            steps.push( this[ mode ].clean( filter ) );
         }
         return Promise.all( steps );
     }

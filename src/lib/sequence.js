@@ -104,7 +104,7 @@ class Sequence extends Events {
 
             return promise.then( value => {
                 const result = {
-                    status : Sequence.SUCCEED,
+                    status : Sequence.SUCCESS,
                     index : this.index,
                     value,
                     time : +new Date
@@ -202,7 +202,7 @@ class Sequence extends Events {
     }
 }
 
-Sequence.SUCCEESS = 1;
+Sequence.SUCCESS = 1;
 Sequence.FAILURE = 0;
 
 function parseArguments( steps, interval, cb ) {

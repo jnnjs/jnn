@@ -17,11 +17,9 @@ export default class Memory extends Storage {
     }
 
     /**
-     * Set data
+     * Set data into memory
      *
-     * @param {string} key
-     * @param {Object|string} data
-     * @param {Object} [options={}]
+     * @override
      */
     set( key, data, options = {} ) {
         data = this.wrap( data, options );
@@ -29,29 +27,45 @@ export default class Memory extends Storage {
         return Promise.resolve( data );
     }
 
+    /**
+     * get data from memory by the key.
+     *
+     * @override
+     */
     get( key, options = {} ) {
         const data = this[ DATA ][ key ];
 
-        if( !data ) return Promise.reject();
+        if( !data ) return Promise.reject( new Error( 'Not Found' ) );
 
         if( this.validate( data, options ) === false ) {
             options.autodelete !== false && this.delete( key );
-            return Promise.reject();
+            return Promise.reject( new Error( 'Invalid Data' ) );
         }
 
         return Promise.resolve( this.unwrap( data, 'page' ) );
     }
 
+    /**
+     * delete data with the key from memeory
+     *
+     * @override
+     */
     delete( key ) {
         this[ DATA ][ key ] = null;
         delete this[ DATA ][ key ];
         return Promise.resolve();
     }
 
+    /**
+     * @override
+     */
     keys() {
         return Promise.resolve( Object.keys( this[ DATA ] ) );
     }
 
+    /**
+     * @override
+     */
     clear() {
         this[ DATA ] = {};
         return Promise.resolve();

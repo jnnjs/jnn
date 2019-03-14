@@ -140,20 +140,20 @@ describe( 'LocalCache', () => {
             () => {
                 return lc.set( 'key', 'update', {
                     page : {
-                        lifetime : 15
+                        lifetime : 30
                     },
                     persistent : {
-                        lifetime : 45
+                        lifetime : 65
                     }
                 } );
             },
-            () => lc.get( 'key', [ 'page' ] ), // 15ms Y
-            () => lc.get( 'key', [ 'persistent' ] ), // 30ms Y
+            () => lc.get( 'key', [ 'page' ] ), // 30ms Y
+            () => lc.get( 'key', [ 'persistent' ] ), // 60ms Y
             () => {
                 return new Promise( resolve => {
                     setTimeout( () => {
                         resolve( lc.get( 'key', [ 'page' ] ) );
-                    }, 15 );
+                    }, 30 );
                 } );
             },
             () => lc.get( 'key', [ 'persistent' ] ),
@@ -161,15 +161,16 @@ describe( 'LocalCache', () => {
                 return new Promise( resolve => {
                     setTimeout( () => {
                         resolve( lc.get( 'key', [ 'persistent' ] ) );
-                    }, 15 );
+                    }, 65 );
                 } );
             },
         ] ).then( results => {
-            expect( results[ 1 ].status ).toEqual( 1 );
-            expect( results[ 2 ].status ).toEqual( 1 );
-            expect( results[ 3 ].status ).toEqual( 0 );
-            expect( results[ 4 ].status ).toEqual( 1 );
-            expect( results[ 5 ].status ).toEqual( 0 );
+            expect( results[ 0 ].status ).toEqual( Sequence.SUCCESS );
+            expect( results[ 1 ].status ).toEqual( Sequence.SUCCESS );
+            expect( results[ 2 ].status ).toEqual( Sequence.SUCCESS  );
+            expect( results[ 3 ].status ).toEqual( Sequence.FAILURE );
+            expect( results[ 4 ].status ).toEqual( Sequence.SUCCESS );
+            expect( results[ 5 ].status ).toEqual( Sequence.FAILURE );
             done();
         } );
 
@@ -249,8 +250,8 @@ describe( 'LocalCache', () => {
         Sequence.chain( [
             () => lc.set( 'key3', 'value', { page : true, session : true, persistent : true } ),
             () => lc.clean( {
-                remove( data, key ) {
-                    return key === 'key3'
+                filter( data, key ) {
+                    return !(key === 'key3')
                 }
             } ),
             () => lc.get( 'key3', [ 'page', 'session', 'persistent' ] ),
@@ -290,19 +291,4 @@ describe( 'LocalCache', () => {
             }
         ] );
     } );
-
-    it( 'restore data in higher storage', done => {
-        const lc = new LocalCache( genname() );
-        Sequence.chain( [
-            () => lc.set( 'key6', 'value', { persistent : true } ),
-            () => lc.get( 'key6', [ 'page', 'persistent' ], { page : true } ),
-            () => lc.get( 'key6', [ 'page', 'persistent' ] ),
-            result => {
-                expect( result.value.storage ).toEqual( 'page' );
-                expect( result.value.data ).toEqual( 'value' );
-                done();
-            }
-        ] );
-    } );
-
 } );

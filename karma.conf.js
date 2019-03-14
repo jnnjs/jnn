@@ -74,10 +74,10 @@ module.exports = function( config ) {
         // configuration for server
         server : {
             //debugging : true,
-            namespace : 'ynn',
+            namespace : '_',
             port : 3000,
             modules : {
-                http : './test/lib/http/server'
+                http : './test/helper/http/server'
             },
             'Access-Control-Allow-Headers' : 'x-custom-header, Authorization'
         },

@@ -9,11 +9,7 @@ export default class SessionStorage extends Storage {
     /**
      * set data into sessionStorage
      *
-     * @param {string} key - the key of the data.
-     * @param {string|object} data - the data which will be stored.
-     * @param {object} [options={}] - the options for storing, same as the options for Storage.prototype.wrap function.
-     *
-     * @return {Promise<string|object, Error>}
+     * @override
      */
     set( key, data, options = {} ) {
         data = this.wrap( data, options );
@@ -26,15 +22,9 @@ export default class SessionStorage extends Storage {
     }
 
     /**
-     * get data from sessionStorage by it's key
-     *
-     * @param {string} key - the key of the data
-     * @param {object} [options={}] - options for getting data, such as validation options.
-     * @param {boolean} [options.autodelete] - denoting if to delete the data if the data exists but it's invalid.
-     * @param {string} [options.md5] - the md5 value for validation, to see more information in Storage.prototype.validate.
-     * @param {Function} [options.validate] - function for validation, to see more information in Storage.prototype.validate.
-     *
-     * @return {Promise<mixed>}
+     * get data from sessionStorage
+     * 
+     * @override
      */
     get( key, options = {} ) {
         try {
@@ -55,9 +45,7 @@ export default class SessionStorage extends Storage {
     /**
      * delete specified data from sessionStorage
      *
-     * @param {string} key - the key of the data.
-     *
-     * @return {Promise<undefined>}
+     * @override
      */
     delete( key ) {
         sessionStorage.removeItem( this.name + key );
@@ -67,7 +55,7 @@ export default class SessionStorage extends Storage {
     /**
      * to delete all data from localStorage
      *
-     * @return {Promise<undefined>}
+     * @override
      */
     clear() {
         sessionStorage.clear();
@@ -76,8 +64,7 @@ export default class SessionStorage extends Storage {
 
     /**
      * get all keys of data that stored in localStorage
-     *
-     * @return {Promise<string[]>} Promise object with the full list of keys.
+     * @override
      */
     keys() {
         const keys = [];

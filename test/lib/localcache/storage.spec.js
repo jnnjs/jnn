@@ -122,123 +122,127 @@ describe( 'Storage', () => {
             } );
         } );
 
-        it( 'validating lifetime', done => {
-            const options = {
-                lifetime : 50,
-                priority : 6
-            };
+        describe( name, () => {
+            
 
-            const storage = new Storage( sname() );
+            it( 'validating lifetime', done => {
+                const options = {
+                    lifetime : 50,
+                    priority : 6
+                };
 
-            Sequence.all( [
-                () => {
-                    return storage.set( 'key', 'data', options ).catch( e => {
-                        console.log( 'Set error: ', e );
-                    } );
-                },
-                () => {
-                    return storage.get( 'key' ).catch( () => {
-                        done();
-                    } );
-                }
-            ], 50 );
-        } );
+                const storage = new Storage( sname() );
 
-        it( 'validating cookie', done => {
-            const options = {
-                lifetime : 50,
-                priority : 6,
-                cookie : true
-            };
+                Sequence.all( [
+                    () => {
+                        return storage.set( 'key', 'data', options ).catch( e => {
+                            console.log( 'Set error: ', e );
+                        } );
+                    },
+                    () => {
+                        return storage.get( 'key' ).catch( () => {
+                            done();
+                        } );
+                    }
+                ], 55 );
+            } );
 
-            const storage = new Storage( sname() );
+            it( 'validating cookie', done => {
+                const options = {
+                    lifetime : 100,
+                    priority : 6,
+                    cookie : true
+                };
 
-            Sequence.all( [
-                () => {
-                    return storage.set( 'key', 'data', options ).catch( e => {
-                        console.log( 'Set error: ', e );
-                    } );
-                },
-                () => {
-                    document.cookie = 'x=' + +new Date;
-                    return storage.get( 'key' ).then( data => {
-                        console.log( 'got data: ', data );
-                    } ).catch( () => {
-                        done();
-                    } );
-                }
-            ] );
-        } );
+                const storage = new Storage( sname() );
 
-        it( 'validating with correct md5 value', done => {
-            const options = {
-                lifetime : 50,
-                priority : 6,
-                cookie : true,
-                md5 : true
-            };
+                Sequence.all( [
+                    () => {
+                        return storage.set( 'key', 'data', options ).catch( e => {
+                            console.log( 'Set error: ', e );
+                        } );
+                    },
+                    () => {
+                        document.cookie = 'x=' + +new Date;
+                        return storage.get( 'key' ).then( data => {
+                            console.log( 'got data: ', data );
+                        } ).catch( () => {
+                            done();
+                        } );
+                    }
+                ] );
+            } );
 
-            const storage = new Storage( sname() );
+            it( 'validating with correct md5 value', done => {
+                const options = {
+                    lifetime : 100,
+                    priority : 6,
+                    cookie : true,
+                    md5 : true
+                };
 
-            Sequence.chain( [
-                () => {
-                    return storage.set( 'key', 'value', options ).catch( e => {
-                        console.log( 'Set error: ', e );
-                    } );
-                },
-                () => {
-                    return storage.get( 'key', { md5 : '2063c1608d6e0baf80249c42e2be5804' } ).then( value => {
-                        expect( value.data ).toEqual( 'value' )
-                        done();
-                    } ).catch( () => {
-                        console.log( 'Should not get data' );
-                    } );
-                }
-            ] );
-        } );
+                const storage = new Storage( sname() );
 
-        it( 'invalid md5 value', done => {
+                Sequence.chain( [
+                    () => {
+                        return storage.set( 'key', 'value', options ).catch( e => {
+                            console.log( 'Set error: ', e );
+                        } );
+                    },
+                    () => {
+                        return storage.get( 'key', { md5 : '2063c1608d6e0baf80249c42e2be5804' } ).then( value => {
+                            expect( value.data ).toEqual( 'value' )
+                            done();
+                        } ).catch( () => {
+                            console.log( 'Should not get data' );
+                        } );
+                    }
+                ] );
+            } );
 
-            const options = {
-                lifetime : 50,
-                priority : 6,
-                cookie : true,
-                md5 : true
-            };
+            it( 'invalid md5 value', done => {
 
-            const storage = new Storage( sname() );
+                const options = {
+                    lifetime : 100,
+                    priority : 6,
+                    cookie : true,
+                    md5 : true
+                };
 
-            Sequence.all( [
-                () => {
-                    return storage.set( 'key', 'data', options ).catch( e => {
-                        console.log( 'Set error: ', e );
-                    } );
-                },
-                () => {
-                    return storage.get( 'key', { md5 : 'xxxx' } ).catch( () => {
-                        done();
-                    } );
-                }
-            ] );
-        } );
+                const storage = new Storage( sname() );
 
-        it( 'validate with custom function', done => {
-            const storage = new Storage( sname() );
+                Sequence.all( [
+                    () => {
+                        return storage.set( 'key', 'data', options ).catch( e => {
+                            console.log( 'Set error: ', e );
+                        } );
+                    },
+                    () => {
+                        return storage.get( 'key', { md5 : 'xxxx' } ).catch( () => {
+                            done();
+                        } );
+                    }
+                ] );
+            } );
 
-            Sequence.all( [
-                () => {
-                    return storage.set( 'key', 'data' ).catch( e => {
-                        console.log( 'Set error: ', e );
-                    } );
-                },
-                () => {
-                    return storage.get( 'key', { 
-                        validate : () => false
-                    } ).catch( () => {
-                        done();
-                    } );
-                }
-            ] );
+            it( 'validate with custom function', done => {
+                const storage = new Storage( sname() );
+
+                Sequence.all( [
+                    () => {
+                        return storage.set( 'key', 'data' ).catch( e => {
+                            console.log( 'Set error: ', e );
+                        } );
+                    },
+                    () => {
+                        return storage.get( 'key', { 
+                            validate : () => false
+                        } ).catch( () => {
+                            done();
+                        } );
+                    }
+                ] );
+            } );
         } );
     };
 

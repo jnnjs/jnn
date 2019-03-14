@@ -1,10 +1,9 @@
-import Storage from './storage';
-import IDB from './IDB';
+import LocalStorage from './local-storage';
+import IDB from './idb';
 
-let Persistent = Storage;
-
-if( window.indexedDB ) {
-    Persistent = IDB;
-}
-
+/**
+ * to use the indexedDB if the client supports indexedDB,
+ * other wise, to use localStorage instead.
+ */
+const Persistent = IDB.isSupported() ? IDB : LocalStorage;
 export default Persistent;

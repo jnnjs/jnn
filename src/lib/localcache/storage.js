@@ -1,6 +1,6 @@
 import is from '../../util/is';
+import md5 from '../../util/md5';
 import Sequence from '../sequence';
-import md5 from './md5';
 
 /**
  * The basic class for LocalCache Storage Enginees.
@@ -25,7 +25,7 @@ export default class Storage {
 
         for( let method of abstracts ) {
             if( !is.function( this[ method ] ) ) {
-                throw new TypeError( `The method "${method}" must be declared in every class extends from Cache` );
+                throw new TypeError( `Storage.prototype.${method} must be overridden in sub class.` );
             }
         }
     }
@@ -43,7 +43,7 @@ export default class Storage {
      * @param {boolean} [options.md5=false] - denoting if calculating and storing the md5 value.
      * @param {boolean} [options.cookie=false] - denoting if the cookie value need to be stored.
      *
-     * @return {object} the wrapped object.
+     * @return {{type: string, mime: string, rank: number, ctime: number, lifetime: number, fmt: string, data: string, extra: ?string, md5: ?string, cookie: ?string }} the wrapped object.
      */
     wrap( data, options = {} ) {
 
@@ -71,10 +71,17 @@ export default class Storage {
             input.extra = JSON.stringify( options.extra );
         }
 
+        /**
+         * if options.md5 is true, to store the md5 value of the serilized data.
+         */
         if( options.md5 ) {
             input.md5 = md5( data );
         }
 
+        /**
+         * to store the md5 value of the cookie string.
+         * the md5 value will be used for checking if the cookies has been changed while getting data.
+         */
         if( options.cookie ) {
             input.cookie = md5( document.cookie );
         }
@@ -173,4 +180,57 @@ export default class Storage {
             return false;
         }
     }
+
+    /**
+     * set data into the storage engine
+     * @abstract
+     *
+     * @param {string} key - the key of the data.
+     * @param {string|Object} data - the data which will be stored.
+     * @param {Object} [options={}] - the options for storing, same as the options for Storage.prototype.wrap function.
+     *
+     * @return {Promise<string|Object, Error>}
+     */
+    set( key, data, options = {} ) {} // eslint-disable-line
+
+    /**
+     * get data from the storage engine
+     * @abstract
+     *
+     * @param {string} key - the key of the data
+     * @param {Object} [options={}] - options for getting data, such as validation options.
+     * @param {boolean} [options.autodelete] - denoting if to delete the data if the data exists but it's invalid.
+     * @param {string} [options.md5] - the md5 value for validation, to see more information in Storage.prototype.validate.
+     * @param {Function} [options.validate] - function for validation, to see more information in Storage.prototype.validate.
+     *
+     * @return {Promise<mixed>}
+     */
+    get( key, options = {} ) {} // eslint-disable-line
+
+    /**
+     * delete specified data from storage engine
+     * @abstract
+     *
+     * @param {string} key - the key of the data
+     *
+     * @return {Promise<undefined>}
+     */
+    delete( key ) {} // eslint-disable-line
+
+    /**
+     * to delete all data from the storage engine.
+     * @abstract
+     *
+     * @return {Promise<undefined>}
+     */
+    clear() {} // eslint-disable-line
+
+    /**
+     *  get all keys of data that stored in the storage engine.
+     *  @abstract
+     *
+     *  @return {Promise<string[]>}
+     */
+    keys() {} // eslint-disable-line
+
 }
